@@ -1,0 +1,43 @@
+﻿<Properties StartupConfiguration="{A7BED6E6-E2A7-4301-A497-4CACF81246F0}|Default">
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/msaulsberry/Projects/points/points/Controllers/PointsController.cs" relfile="points/Controllers/PointsController.cs" line="47" column="1" />
+      <Breakpoint file="/Users/msaulsberry/Projects/points/points/Services/PointService.cs" relfile="points/Services/PointService.cs" line="45" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.points PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="points/Program.cs">
+    <Files>
+      <File FileName="points/Program.cs" Line="30" Column="1" />
+      <File FileName="points/Controllers/PointsController.cs" Line="23" Column="20" />
+      <File FileName="points/Models/Transaction.cs" />
+      <File FileName="points/Models/Payer.cs" Line="7" Column="24" />
+      <File FileName="points/Models/Responses/PayerSpendResponse.cs" Line="7" Column="34" NotebookId="1" />
+      <File FileName="points/Services/PointService.cs" Line="1" Column="1" NotebookId="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="points" expanded="True">
+            <Node name="points" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="Requests" expanded="True" />
+                <Node name="Responses" expanded="True" />
+              </Node>
+              <Node name="Services" expanded="True">
+                <Node name="Interfaces" expanded="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+</Properties>
