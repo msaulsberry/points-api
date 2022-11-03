@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Register as a singleton to leverage an in-memory store in the service
 builder.Services.AddSingleton<IPointService, PointService>();
 
 var app = builder.Build();

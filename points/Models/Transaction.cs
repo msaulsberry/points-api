@@ -6,7 +6,7 @@ namespace points.Models;
 public class Transaction
 {
 
-    //Let domain entity handle it's creation through the constructor
+    //Let domain entity handle it's itialization through the constructor
     public Transaction(TransactionRequest request, Guid? spendEventId = null)
     {
         Id = Guid.NewGuid();
@@ -42,6 +42,7 @@ public class Transaction
     public Guid? SpendEventId { get; }
 
     //Encapsulate domain entity related functionality within the entity itself
+
     public int GetRemainingValue()
     {
         var value = this.Points - Math.Abs(this.OffsetTransactions.Sum(t => t.Points));
@@ -49,13 +50,15 @@ public class Transaction
         return value;
     }
 
-    public Transaction CreateOffsetTransaction(int decrementAmount, Guid? spendEventId = null)
+    public Transaction CreateOffsetTransaction(int decrementAmount, Guid? spendEventId = null, DateTime? requestTimestamp = null)
     {
+        DateTime timestamp = requestTimestamp != null ? (DateTime)requestTimestamp : DateTime.Now;
+
         var newRequest = new TransactionRequest
         {
             Payer = this.PayerName,
             Points = decrementAmount,
-            Timestamp = DateTime.Now
+            Timestamp = timestamp,
         };
 
         var newTransaction = new Transaction(newRequest, spendEventId);

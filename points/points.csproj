@@ -17,6 +17,7 @@
     <None Remove="Models\Responses\" />
     <None Remove="Services\Interfaces\" />
     <None Remove="Models\Enums\" />
+    <None Remove="Attributes\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -25,5 +26,6 @@
     <Folder Include="Models\Responses\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Models\Enums\" />
+    <Folder Include="Attributes\" />
   </ItemGroup>
 </Project>

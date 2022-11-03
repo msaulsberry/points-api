@@ -9,7 +9,7 @@ namespace points.Services;
 public class PointService : IPointService
 {
 
-    //mock the data stores for our entities
+    // Mock the data stores for our entities
     public IList<Transaction> Transactions = new List<Transaction>();
 
     public IList<Payer> Payers = new List<Payer>();
@@ -19,19 +19,23 @@ public class PointService : IPointService
 
     public PointService() {}
 
-    //publicly exposed interface
+    // Publicly exposed interface
 
     public string? AddTransaction(TransactionRequest request)
     {
         var newTransaction = new Transaction(request);
 
+        // Will treat adding 'spend' transactions through our public interface as
+        // a requirement here. It just splits the request into separate transactions
+        // if it is too large to deduct from a single 'earn' transaction. Increases the granularity
+        // of which points came from where in order to help with accounting
         if (newTransaction.Type == TransactionType.Spend)
             return SpendPointsByPayer(request);
+        else
+            Transactions.Add(newTransaction);
 
-        Transactions.Add(newTransaction);
-
-        if (!(Payers.Any(p => p.Name == newTransaction.PayerName)))
-            Payers.Add(new Payer { Id = Guid.NewGuid(), Name = newTransaction.PayerName });
+        if (!(Payers.Any(p => p.Name == request.Payer)))
+            Payers.Add(new Payer(request.Payer));
 
         return "success";
     }
@@ -40,16 +44,16 @@ public class PointService : IPointService
     {
         var pointsToSpend = request.points;
 
-        // Returning null is often not preferred, but for simplicity's sake, it represents an
-        // invalid transaction that would result in negative points for a user
-        if (pointsToSpend <= 0 || pointsToSpend > GetCurrentBalance())
+        if (pointsToSpend > GetCurrentBalance())
             return null;
 
         var eligibleTransactions = Transactions
                                     .Where(t => !t.Spent && t.Type == TransactionType.Earn)
                                     .OrderBy(t => t.Timestamp).ToList();
 
-        var spendEvent = new SpendEvent { Id = Guid.NewGuid(), Amount = request.points };
+        var spendEvent = new SpendEvent(request.points);
+        SpendEvents.Add(spendEvent);
+
         var generatedTransactions = GenerateSpendTransactions(pointsToSpend, eligibleTransactions, spendEvent.Id);
 
         var spendResponses = new List<PayerSpendResponse>();
@@ -59,25 +63,22 @@ public class PointService : IPointService
         }
 
         return spendResponses;
-
     }
 
     public object GetPayerBalances()
     {
         var payerBalances = new Dictionary<string, int>();
 
-        foreach (var payer in Payers)
+        foreach (var payer in this.Payers)
         {
-            var payerName = payer.Name;
             var balance = GetBalanceByPayer(payer.Name);
-            payerBalances.Add(payerName, balance);
+            payerBalances.Add(payer.Name, balance);
         }
 
         return payerBalances;
     }
 
-
-    //private methods encapsulated in the service
+    // Encapsulate private helper methods in the service
 
     private string? SpendPointsByPayer(TransactionRequest request)
     {
@@ -90,12 +91,15 @@ public class PointService : IPointService
                                     .Where(t => !t.Spent && t.Type == TransactionType.Earn && t.PayerName == request.Payer)
                                     .OrderBy(t => t.Timestamp).ToList();
 
-        var addedTransactions = GenerateSpendTransactions(pointsToSpend, eligibleTransactions);
+        GenerateSpendTransactions(pointsToSpend, eligibleTransactions, requestTimestamp: request.Timestamp);
 
         return "success";
     }
 
-    private IList<Transaction> GenerateSpendTransactions(int pointsToSpend, IList<Transaction> eligibleTransactions, Guid? spendEventId = null)
+    private IList<Transaction> GenerateSpendTransactions(int pointsToSpend,
+                                                            IList<Transaction> eligibleTransactions,
+                                                            Guid? spendEventId = null,
+                                                            DateTime? requestTimestamp = null)
     {
         var generatedTransactions = new List<Transaction>();
 
@@ -106,14 +110,14 @@ public class PointService : IPointService
 
             if (pointsToSpend >= remainingPositiveBalance)
             {
-                newTransaction = transaction.CreateOffsetTransaction(remainingPositiveBalance * -1, spendEventId);
+                newTransaction = transaction.CreateOffsetTransaction(remainingPositiveBalance * -1, spendEventId, requestTimestamp);
                 transaction.Spent = true;
                 pointsToSpend -= remainingPositiveBalance;
             }
             else
             {
                 // transaction has enough positive points to offset current spend 
-                newTransaction = transaction.CreateOffsetTransaction(pointsToSpend * -1, spendEventId);
+                newTransaction = transaction.CreateOffsetTransaction(pointsToSpend * -1, spendEventId, requestTimestamp);
                 pointsToSpend = 0;
             }
 
@@ -130,14 +134,12 @@ public class PointService : IPointService
     private int GetBalanceByPayer(string payerName)
     {
         var balance = Transactions.Where(t => t.PayerName == payerName).Sum(t => t.Points);
-
         return balance;
     }
 
     private int GetCurrentBalance()
     {
         var balance = Transactions.Sum(t => t.Points);
-
         return balance;
     }
 }

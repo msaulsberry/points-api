@@ -10,9 +10,7 @@ namespace points.Controllers;
 [Route("[controller]")]
 public class PointsController : ControllerBase
 {
-
     private IPointService _pointService;
-
 
     public PointsController(IPointService pointService)
     {
